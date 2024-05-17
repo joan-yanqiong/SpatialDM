@@ -38,7 +38,14 @@ def weight_matrix(adata, l, cutoff=None, n_neighbors=None, n_nearest_neighbors=6
         
         # At single-cell resolution, no within-spot communications
         if singlecell:
-            np.fill_diagonal(rbf_d, 0)
+            # Convert csr_matrix to lil_matrix for efficient row operations
+            rbf_d_lil = rbf_d.tolil()
+            
+            # Set diagonal elements to zero
+            rbf_d_lil.setdiag(0)
+            
+            # Convert back to csr_matrix if needed
+            rbf_d = rbf_d_lil.tocsr()
         else:
             rbf_d.setdiag(np.exp(-X.diagonal()**2 / (2 * l ** 2)))
 
